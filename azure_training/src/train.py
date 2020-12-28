@@ -53,6 +53,7 @@ if __name__ == "__main__":
 
     rgb_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
+    # TODO: add callbacks to log into azure, save model checkpoints, early stopping
     rgb_model.fit(rgb_dataset_train, epochs=1, steps_per_epoch=20, validation_data=rgb_dataset_valid)
 
     loss, acc = rgb_model.evaluate(rgb_dataset_test)
