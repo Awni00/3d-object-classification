@@ -1,3 +1,4 @@
+# TODO: restructure repo
 import os
 import argparse
 import tensorflow as tf
@@ -54,6 +55,10 @@ if __name__ == "__main__":
     rgb_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
     # TODO: add callbacks to log into azure, save model checkpoints, early stopping
+    # TODO: dataset prefetch, cache, shuffle, batch, etc...
+    # TODO: in-model rescale
+    # TODO: check numpy range of depth
+    # TODO: use distributed training strategy for multiple gpus
     rgb_model.fit(rgb_dataset_train, epochs=1, steps_per_epoch=20, validation_data=rgb_dataset_valid)
 
     loss, acc = rgb_model.evaluate(rgb_dataset_test)
