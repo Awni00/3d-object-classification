@@ -1,7 +1,6 @@
 import os
 import pathlib
 
-import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -10,7 +9,7 @@ from tensorflow.python.keras.preprocessing import dataset_utils
 from tensorflow.python.ops import image_ops, io_ops
 
 
-def create_rgbd_dataset(rgbd_data_path, label_mode='categorical'):
+def create_rgbd_dataset(rgbd_data_path, label_mode='categorical', azure=True):
     """creates a tensorflow dataset from the washington rgbd-dataset
 
     Args:
@@ -23,7 +22,7 @@ def create_rgbd_dataset(rgbd_data_path, label_mode='categorical'):
 
     image_paths = [str(file) for file in get_files_in_dir(
         pathlib.Path(rgbd_data_path)) if is_rgb_im(file)]
-    labels = [label_from_path(path) for path in image_paths]
+    labels = [label_from_path(path, azure=azure) for path in image_paths]
 
     class_names = list(np.unique(labels))
     label_int_dict = {class_name: i for i,
@@ -39,6 +38,10 @@ def create_rgbd_dataset(rgbd_data_path, label_mode='categorical'):
 
     return rgbd_dataset
 
+def label_from_path(path, azure=True):
+    '''gets label from path directory structure'''
+    if azure: return path.split('/')[-2]
+    else: return path.split('\\')[-2]
 
 def paths_and_labels_to_dataset(image_paths, labels, num_classes, label_mode):
     """Constructs a dataset of images and labels."""
@@ -61,6 +64,7 @@ def paths_and_labels_to_dataset(image_paths, labels, num_classes, label_mode):
 
 
 def load_rgb_depth_img_from_path(path):
+    '''loads rgb and depth images from a given path'''
     rgb_path = path
 
     str_len = tf.strings.length(path)
@@ -80,6 +84,7 @@ non_rgb = ['mask', 'depth']
 
 
 def is_rgb_im(file):
+    '''determines whether a file is an rgb image from its name'''
     is_img = file.suffix == '.png'
     is_rgb = not any([x in file.name for x in non_rgb])
 
