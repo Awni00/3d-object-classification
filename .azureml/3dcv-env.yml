@@ -1,0 +1,15 @@
+name: 3dcv
+channels:
+  - defaults
+dependencies:
+  - python=3.7.0
+  - pillow
+  - qt
+  - scipy
+  - tensorflow-hub
+  - numpy
+  - pandas
+  - matplotlib
+  - pip:
+    - tensorflow-gpu==2.3.1
+    - azureml-sdk
