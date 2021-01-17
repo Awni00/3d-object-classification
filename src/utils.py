@@ -38,6 +38,22 @@ def create_rgbd_dataset(rgbd_data_path, label_mode='categorical', azure=True):
 
     return rgbd_dataset
 
+def create_rgb_dataset(rgbd_data_path, label_mode='categorical'):
+    image_paths = [str(file) for file in get_files_in_dir(pathlib.Path(rgbd_data_path)) if is_rgb_im(file)]
+    labels = [label_from_path(path) for path in image_paths]
+
+    class_names = list(np.unique(labels))
+    label_int_dict = {class_name: i for i, class_name in enumerate(class_names)}
+    int_labels = [label_int_dict[class_name] for class_name in labels]
+
+    rgb_dataset = paths_and_labels_to_rgb_dataset(image_paths, int_labels, len(class_names), label_mode)
+
+    rgb_dataset.class_names = class_names
+    rgb_dataset.file_paths = image_paths
+    rgb_dataset.label_int_dict = label_int_dict
+
+    return rgb_dataset
+
 def label_from_path(path, azure=True):
     '''gets label from path directory structure'''
     if azure: return path.split('/')[-2]
@@ -53,10 +69,10 @@ def paths_and_labels_to_dataset(image_paths, labels, num_classes, label_mode):
     return img_ds
 
 
-def paths_and_labels_to_dataset(image_paths, labels, num_classes, label_mode):
+def paths_and_labels_to_rgb_dataset(image_paths, labels, num_classes, label_mode):
     """Constructs a dataset of images and labels."""
     path_ds = dataset_ops.Dataset.from_tensor_slices(image_paths)
-    img_ds = path_ds.map(lambda path: load_rgb_depth_img_from_path(path))
+    img_ds = path_ds.map(lambda path: load_rgb_img_from_path(path))
     label_ds = dataset_utils.labels_to_dataset(labels, label_mode, num_classes)
     img_ds = dataset_ops.Dataset.zip((img_ds, label_ds))
 
@@ -79,6 +95,12 @@ def load_rgb_depth_img_from_path(path):
         depth_img, channels=1, expand_animations=False)
     return rgb_img, depth_img
 
+
+def load_rgb_img_from_path(rgb_path):
+    rgb_img = io_ops.read_file(rgb_path)
+    rgb_img = image_ops.decode_image(rgb_img, channels=3, expand_animations=False)
+
+    return rgb_img
 
 non_rgb = ['mask', 'depth']
 
