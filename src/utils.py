@@ -92,7 +92,7 @@ def load_rgb_depth_img_from_path(path):
 
     depth_img = io_ops.read_file(depth_path)
     depth_img = image_ops.decode_image(
-        depth_img, channels=1, expand_animations=False)
+        depth_img, channels=1, expand_animations=False, dtype=tf.uint16)
     return rgb_img, depth_img
 
 
