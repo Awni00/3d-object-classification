@@ -63,22 +63,6 @@ if __name__ == "__main__":
     print(rgbd_dataset.class_names)
     print('----------------')
 
-
-    # NOTE: TEMP checking files  in dataset object for debugging
-    # print('train dataset files: ')
-    # print(rgbd_dataset.file_paths)
-
-    # print('\n\n\n')
-    # print('test dataset files: ')
-    # print(test_dataset.file_paths)
-
-    # # define training strategy
-    # strategy = tf.distribute.MirroredStrategy()
-
-    # # the number of devices
-    # print(f'number of devices: {strategy.num_replicas_in_sync}')
-    # run.log('number of devices', strategy.num_replicas_in_sync)
-
     num_train_examples = len(rgbd_dataset)
     print('num train examples: ', num_train_examples)
     run.log('num train examples', num_train_examples)
@@ -145,9 +129,7 @@ if __name__ == "__main__":
 
 
     # TODO: add callbacks for: early stopping, ...
-    # TODO: use distributed training strategy for multiple gpus (seems not as cost-efficient)
     # TODO: image augmentation
-    # TODO: custom training loop to fix loading issue. try loading (no training) loop locally (does the same problem arise?)
     print('beginning training...')
     # epoch_start = 0
     # n_epochs = 4
