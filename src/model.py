@@ -17,7 +17,9 @@ r50x1_loc = "https://tfhub.dev/google/bit/m-r50x1/1"
 # NOTE: architecture idea: seap information from other stream while still focusing on one at a time, before final concatenation
 # TODO: depth-only model to train feature extraction without being confused by rgb info then use weights in full rgb-d model
 # TODO: object segmentation model
-# TODO: normalization/rescaling on depth image
+# TODO: analyze model performance using saliency maps/class activation maps (validate use of depth info)
+# TODO: normalization/rescaling on depth image (IMPORTANT)
+# TODO: pre-trained/partially trained rgb model on HHA image
 def build_model(input_shape, num_classes, feat_vec_embedding=None, model_name='rgbd_model'):
     # Load feature vector extractor into KerasLayer
     if feat_vec_embedding is not None:
