@@ -98,7 +98,7 @@ def paths_and_labels_to_rgb_dataset(image_paths, labels, num_classes, label_mode
 def paths_and_labels_to_depth_dataset(image_paths, labels, num_classes, label_mode):
     """Constructs a dataset of depth images and their labels."""
     path_ds = dataset_ops.Dataset.from_tensor_slices(image_paths)
-    img_ds = path_ds.map(lambda path: load_rgb_img_from_path(path))
+    img_ds = path_ds.map(lambda path: load_depth_img_from_path(path))
     label_ds = dataset_utils.labels_to_dataset(labels, label_mode, num_classes)
     img_ds = dataset_ops.Dataset.zip((img_ds, label_ds))
 
