@@ -34,10 +34,12 @@ def build_model(input_shape, num_classes, feat_vec_embedding=None, model_name='r
     rgb_input = Input(shape=(input_shape[0], input_shape[1], 3), name='rgb_input')
     depth_input = Input(shape=(input_shape[0], input_shape[1], 1), name='depth_input')
 
-    rescaled_rgb = Rescaling(1./255, name='normalize')(rgb_input)
+    rescaled_rgb = Rescaling(1./255, name='normalize_rgb')(rgb_input)
+    rescaled_depth = Rescaling(1./255, name='normalize_depth')(depth_input)
+
     rgb_embedding = feat_vec_layer(rescaled_rgb)
 
-    depth_conv1 = Convolution2D(filters=32, kernel_size=(3,3), strides=(1, 1), padding='same', activation='relu', name='depth_conv1')(depth_input)
+    depth_conv1 = Convolution2D(filters=32, kernel_size=(3,3), strides=(1, 1), padding='same', activation='relu', name='depth_conv1')(rescaled_depth)
     depth_maxpool1 = MaxPooling2D(pool_size=(2, 2), strides=(2,2), name='depth_maxpool1')(depth_conv1)
 
     depth_conv2 = Convolution2D(filters=64, kernel_size=(3,3), strides=(1, 1), padding='same', activation='relu', name='depth_conv2')(depth_maxpool1)
