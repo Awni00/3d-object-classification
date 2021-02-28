@@ -16,7 +16,6 @@ def train_epoch(model, train_dataset, epoch_num, optimizer, loss, train_metric, 
     step = 1
     while step <= max_steps:
         try:
-            #((x_rgb_batch, x_depth_batch), y_batch) = train_iter.next()
             (x_batch, y_batch) = train_iter.next()
 
             logits, loss_value = apply_gradient(model, optimizer, loss, x_batch, y_batch)
