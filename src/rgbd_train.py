@@ -7,7 +7,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 import numpy as np
 
-from model import build_model, AzureLogCallback
+from rgbd_model import build_model, AzureLogCallback
 import utils
 import train_utils
 
