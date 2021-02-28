@@ -29,6 +29,8 @@ def build_model(input_shape, num_classes, feat_vec_embedding=None, model_name='r
         #r50x1_loc = "../models/bit_m-r50x1_1" # NOTE location of embedding model in azure data store
         feat_vec_layer = hub.KerasLayer(r50x1_loc, name='feat_vec_embedding', trainable=False)
 
+    reg = tf.keras.regularizers.l1_l2(l1=0.0, l2=0.01)
+
     rgb_input = Input(shape=(input_shape[0], input_shape[1], 3), name='rgb_input')
     depth_input = Input(shape=(input_shape[0], input_shape[1], 1), name='depth_input')
 
@@ -57,11 +59,11 @@ def build_model(input_shape, num_classes, feat_vec_embedding=None, model_name='r
 
     rgb_depth_concat = Concatenate()([rgb_embedding, depth_feat_vec])
 
-    dense1 = Dense(units=128, activation='relu', name='dense1')(rgb_depth_concat)
+    dense1 = Dense(units=128, activation='relu', kernel_regularizer=reg, name='dense1')(rgb_depth_concat)
     dense1_dropout = Dropout(0.5)(dense1)
-    dense2 = Dense(units=64, activation='relu', name='dense2')(dense1_dropout)
+    dense2 = Dense(units=64, activation='relu', kernel_regularizer=reg, name='dense2')(dense1_dropout)
     dense2_dropout = Dropout(0.5)(dense2)
-    output = Dense(units=num_classes, activation='softmax', name='output')(dense2_dropout)
+    output = Dense(units=num_classes, activation='softmax', kernel_regularizer=reg, name='output')(dense2_dropout)
 
     rgbd_model = tf.keras.Model(inputs=[rgb_input, depth_input], outputs=[output], name=model_name)
 
