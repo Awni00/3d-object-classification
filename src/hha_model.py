@@ -14,26 +14,44 @@ r50x1_loc = "https://tfhub.dev/google/bit/m-r50x1/1"
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.layers.experimental.preprocessing import Rescaling
 
-def build_model(input_shape, num_classes, feat_vec_embedding=None, model_name='hha_model'):
+def build_model(input_shape, num_classes, model_name='hha_model'):
+    '''build hha image classification model'''
 
-  # Load feature vector extractor into KerasLayer
-  if feat_vec_embedding is not None:
-      feat_vec_layer = feat_vec_embedding
-  else:
-      r50x1_loc = "https://tfhub.dev/google/bit/m-r50x1/1"
-      #r50x1_loc = "../models/bit_m-r50x1_1" # NOTE location of embedding model in azure data store
-      feat_vec_layer = hub.KerasLayer(r50x1_loc, name='feat_vec_embedding', trainable=False)
+    hha_input = Input(shape=(input_shape[0], input_shape[1], 3), name='hha_input')
+    rescaled_hha = Rescaling(1./255, name='normalize')(hha_input)
 
-  input_shape = (input_shape[0], input_shape[1], 3)
-  hha_input = Input(shape=input_shape, name='hha_image')
-  rescaled_image = Rescaling(1./255, name='normalize')(hha_input)
-  image_embedding = feat_vec_layer(rescaled_image)
+    reg = tf.keras.regularizers.l1_l2(l1=0.0, l2=0.01)
 
-  output = Dense(num_classes, activation='softmax', name='output')(image_embedding)
 
-  hha_model = tf.keras.Model(inputs=[hha_input], outputs=[output], name=model_name)
+    hha_conv1 = Convolution2D(filters=32, kernel_size=(3,3), strides=(1, 1), padding='same', activation='relu', name='hha_conv1')(rescaled_hha)
+    hha_maxpool1 = MaxPooling2D(pool_size=(2, 2), strides=(2,2), name='hha_maxpool1')(depth_conv1)
 
-  return hha_model
+    hha_conv2 = Convolution2D(filters=64, kernel_size=(3,3), strides=(1, 1), padding='same', activation='relu', name='hha_conv2')(depth_maxpool1)
+    hha_maxpool2 = MaxPooling2D(pool_size=(2, 2), strides=(2,2), name='hha_maxpool2')(depth_conv2)
+
+    hha_conv3 = Convolution2D(filters=64, kernel_size=(3,3), strides=(1, 1), padding='same', activation='relu', name='hha_conv3')(depth_maxpool2)
+    hha_maxpool3 = MaxPooling2D(pool_size=(2,2), strides=(2,2), name='hha_maxpool3')(depth_conv3)
+
+    hha_conv4 = Convolution2D(filters=128, kernel_size=(3,3), strides=(1, 1), padding='same', activation='relu', name='hha_conv4')(depth_maxpool3)
+    hha_maxpool4 = MaxPooling2D(pool_size=(2,2), strides=(2,2), name='hha_maxpool4')(depth_conv4)
+
+    hha_conv5 = Convolution2D(filters=128, kernel_size=(3,3), strides=(1, 1), padding='same', activation='relu', name='hha_conv5')(depth_maxpool4)
+    hha_maxpool5 = MaxPooling2D(pool_size=(2,2), strides=(2,2), name='hha_maxpool5')(depth_conv5)
+
+    hha_conv6 = Convolution2D(filters=64, kernel_size=(3,3), strides=(1, 1), padding='same', activation='relu', name='hha_conv6')(depth_maxpool5)
+    hha_maxpool6 = MaxPooling2D(pool_size=(2,2), strides=(2,2), name='hha_maxpool6')(depth_conv6)
+
+    hha_feat_vec = Flatten()(depth_maxpool6)
+
+    dense1 = Dense(units=128, activation='relu', kernel_regularizer=reg, name='dense1')(depth_feat_vec)
+    dense1_dropout = Dropout(0.5)(dense1)
+    dense2 = Dense(units=64, activation='relu', kernel_regularizer=reg, name='dense2')(dense1_dropout)
+    dense2_dropout = Dropout(0.5)(dense2)
+    output = Dense(units=num_classes, activation='softmax', name='output')(dense2_dropout)
+
+    hha_model = tf.keras.Model(inputs=hha_input, outputs=[output], name=model_name)
+
+    return hha_model
 
 class AzureLogCallback(tf.keras.callbacks.Callback):
     def __init__(self, run, metrics_to_log=['loss', 'accuracy']):
