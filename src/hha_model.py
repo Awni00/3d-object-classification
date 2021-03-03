@@ -1,6 +1,7 @@
 import tensorflow as tf
 import tensorflow_hub as hub
 
+
 import numpy as np
 
 import os
@@ -11,7 +12,9 @@ r50x1_loc = "https://tfhub.dev/google/bit/m-r50x1/1"
 # r50x1_loc = "embedding_models/bit_m-r50x1_1" # location of embedding model in azure data store
 
 
-from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.layers import (Concatenate, Convolution2D, Dense,
+                                     Dropout, Flatten, GlobalAveragePooling2D,
+                                     GlobalMaxPooling2D, Input, MaxPooling2D)
 from tensorflow.keras.layers.experimental.preprocessing import Rescaling
 
 def build_model(input_shape, num_classes, model_name='hha_model'):
