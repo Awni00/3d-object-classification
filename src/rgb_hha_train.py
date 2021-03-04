@@ -7,7 +7,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 import numpy as np
 
-from rgb_hha_model import build_model, AzureLogCallback
+from rgb_hha_model import build_hha_feature_extractor, build_rgb_hha_model
 import utils
 import train_utils
 
@@ -21,6 +21,11 @@ if __name__ == "__main__":
         '--data_path',
         type=str,
         help='Path to the training data'
+    )
+    parser.add_argument(
+        '--hha_weights_path',
+        type=str,
+        help='Path to the hha model\'s weights'
     )
     parser.add_argument(
         '--model_weights_path',
@@ -83,9 +88,19 @@ if __name__ == "__main__":
     # Build model
     print('building model...')
     start_time = time.time()
+
+    # first, build pre-trained hha feature extractor
+    hha_feat_extractor = build_hha_feature_extractor(
+        weights=args.hha_weights_path, trainable=False)
+    hha_feat_extractor.summary()
+
+    # now build rgb-hha model
+    rgb_hha_model = build_rgb_hha_model(input_shape=(200, 200), num_classes=51, 
+        hha_feat_vec_embedding=hha_feat_extractor, rgb_feat_vec_embedding=None, 
+        model_name='rgb-hha_model')
+    rgb_hha_model.summary()
+
     weights_loaded = False
-    # with strategy.scope():
-    rgb_hha_model = build_model(IM_SIZE, NUM_CLASSES)
     try:
         weights_path = f'{args.model_weights_path}/{args.model_weights_name}'
         print('loading weights from ', weights_path)
@@ -120,8 +135,7 @@ if __name__ == "__main__":
         print('done and logged!')
 
 
-    # TODO: add callbacks for: early stopping, ...
-    # TODO: image augmentation
+    # TRAINING
     print('beginning training...')
 
     os.mkdir('outputs/checkpoints') # make checkpoints directory
