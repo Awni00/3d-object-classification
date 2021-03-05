@@ -37,9 +37,8 @@ if __name__ == "__main__":
 
     print("===== INPUTS =====")
     print("DATA PATH: " + args.data_path)
-    if (args.model_weights_path is not None) and (args.model_weights_name is not None):
+    if (args.model_weights_path is not None):
         print("MODEL WEIGHTS PATH: " + args.model_weights_path)
-        print('MODEL WEIGHTS NAME: ' + args.model_weights_name)
 
     # set up logging
     logging.basicConfig(filename='outputs/train.log', level=logging.ERROR,
