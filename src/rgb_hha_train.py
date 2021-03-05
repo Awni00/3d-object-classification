@@ -120,17 +120,6 @@ if __name__ == "__main__":
     train_metric = tf.keras.metrics.CategoricalAccuracy()
     test_metric = tf.keras.metrics.CategoricalAccuracy()
 
-    rgb_hha_model.compile(optimizer, loss)
-
-    # only evaluate against test dataset before training if weights were loaded
-    if weights_loaded:
-        print("testing against test dataset before training")
-        loss, acc = rgb_hha_model.evaluate(test_dataset)
-        run.log('pre-training test accuracy', np.float(acc))
-        run.log('pre-training test loss', np.float(loss))
-        print('done and logged!')
-
-
     # TRAINING
     print('beginning training...')
 
