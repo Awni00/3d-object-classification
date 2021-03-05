@@ -31,10 +31,6 @@ if __name__ == "__main__":
         '--model_weights_path',
         type=str,
         help='path to model weights to load before training')
-    parser.add_argument(
-        '--model_weights_name',
-        type=str,
-        help='filename of model weights')
 
 
     args = parser.parse_args()
@@ -91,18 +87,18 @@ if __name__ == "__main__":
 
     # first, build pre-trained hha feature extractor
     hha_feat_extractor = build_hha_feature_extractor(
-        weights=args.hha_weights_path, trainable=False)
+        weights=args.hha_weights_path, trainable=True)
     hha_feat_extractor.summary()
 
     # now build rgb-hha model
-    rgb_hha_model = build_rgb_hha_model(input_shape=(200, 200), num_classes=51, 
-        hha_feat_vec_embedding=hha_feat_extractor, rgb_feat_vec_embedding=None, 
+    rgb_hha_model = build_rgb_hha_model(input_shape=(200, 200), num_classes=51,
+        hha_feat_vec_embedding=hha_feat_extractor, rgb_feat_vec_embedding=None,
         model_name='rgb-hha_model')
     rgb_hha_model.summary()
 
     weights_loaded = False
     try:
-        weights_path = f'{args.model_weights_path}/{args.model_weights_name}'
+        weights_path = f'{args.model_weights_path}'
         print('loading weights from ', weights_path)
         rgb_hha_model.load_weights(weights_path)
         weights_loaded = True
@@ -141,7 +137,7 @@ if __name__ == "__main__":
     os.mkdir('outputs/checkpoints') # make checkpoints directory
 
     # training loop
-    epochs = 3
+    epochs = 8
 
     for epoch in range(1, epochs + 1):
         # training batches
