@@ -1,5 +1,7 @@
 import tensorflow as tf
 import numpy as np
+import cv2
+import matplotlib.pyplot as plt
 
 import utils
 
@@ -92,3 +94,92 @@ def get_pred_true(model, batched_dataset):
         eval_true = np.concatenate([eval_true, true_classes])
 
     return eval_preds, eval_true
+
+def get_gradients(inputs, y, model):
+    '''get gradients of model's output w.r.t. input images'''
+
+    with tf.GradientTape() as tape:
+        # format dims
+        inputs = format_dims(inputs)
+
+        # cast as float
+        inputs = [tf.cast(input_, tf.float32) for input_ in inputs]
+
+        # watch the input pixels
+        tape.watch(inputs)
+
+        # generate predictions
+        predictions = model(inputs)
+
+        # get the loss
+        loss = tf.keras.losses.categorical_crossentropy(y, predictions)
+
+    # get the gradient with respect to the inputs
+    gradients = tape.gradient(loss, inputs)
+
+    return gradients
+
+def gen_img_saliency(img, grads, plot=False):
+    '''generate saliency map for one image'''
+
+    # reduce the RGB image to grayscale
+    grayscale_tensor = tf.reduce_sum(tf.abs(grads), axis=-1)
+
+    # normalize the pixel values to be in the range [0, 255].
+    # the max value in the grayscale tensor will be pushed to 255.
+    # the min value will be pushed to 0.
+    normalized_tensor = tf.cast(
+        255 * (grayscale_tensor - tf.reduce_min(grayscale_tensor))
+        / (tf.reduce_max(grayscale_tensor) - tf.reduce_min(grayscale_tensor)),
+        tf.uint8)
+
+    # remove the channel dimension to make the tensor a 2d tensor
+    normalized_tensor = tf.squeeze(normalized_tensor)
+
+    if plot:
+        plt.figure(figsize=(8, 8))
+        plt.axis('off')
+        plt.imshow(normalized_tensor, cmap='gray')
+        plt.show()
+
+    return normalized_tensor
+
+
+def gen_super_imposed(img, saliency, plot=False):
+    '''superimposed original image with its saliency map'''
+
+    gradient_color = cv2.applyColorMap(np.array(saliency), cv2.COLORMAP_HOT)
+    gradient_color = np.array(gradient_color / 255.0)
+    super_imposed = cv2.addWeighted(np.array(img) / 255., 0.5, gradient_color, 0.5, 0.0, dtype = cv2.CV_32F)
+
+    if plot:
+        plt.figure(figsize=(8, 8))
+        plt.imshow(super_imposed)
+        plt.axis('off')
+        plt.show()
+
+    return super_imposed
+
+
+def gen_saliency_map(inputs, y, model, plot=True):
+    '''generate saliency maps for (rgb, d) image pair'''
+
+    gradients = get_gradients(inputs, y, model)
+
+    rgb_img, d_img = inputs
+    rgb_grads, d_grads = gradients
+
+    rgb_sal = gen_img_saliency(rgb_img, rgb_grads, plot=False)
+    d_sal = gen_img_saliency(d_img, d_grads, plot=False)
+
+    rgb_superimposed = gen_super_imposed(rgb_img[0], rgb_sal)
+    d_superimposed = gen_super_imposed(d_img[0], d_sal)
+
+    if plot:
+        fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(10, 6));
+        ax1.imshow(rgb_superimposed);
+        ax2.imshow(d_superimposed);
+        return fig
+    else:
+        return (rgb_superimposed, d_superimposed)
+
