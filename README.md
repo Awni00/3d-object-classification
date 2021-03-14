@@ -5,4 +5,6 @@ K. Lai, L. Bo, X. Ren, and D. Fox, “A large-scale hierarchical multi-view RGB-
 
 The aim of this project is to build a model which outperforms models which use only 2 dimensional RGB data, and to match the performance of state-of-the-art depth models.
 
-The general approach followed is to split the model into two processing streams, one for the RGB channels and one for the depth channel, that are combined at the end before making a prediction. In the RGB processing stream, we make use of the existing powerful RGB models through transfer learning. In the depth processing stream, we use more sophisticated representations of the depth information.
+The general approach followed is to split the model into two processing streams, one for the RGB channels and one for the depth channel, that are combined at the end before making a prediction. In the RGB processing stream, we make use of the existing powerful RGB models through transfer learning. In the depth processing stream, we use more sophisticated representations of the depth information (a geocentric encoding called HHA).
+
+The model and training code is in the `src` directory. The directory also contains some useful utilities. `demo.ipynb` demos the trained models on rgb-d images. `model_evaluation.ipynb` presents an evaluation of the performance of the various models. `depth_validation.ipynb` presents an evaluation of the use of depth information in the models.
