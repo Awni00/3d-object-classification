@@ -14,8 +14,11 @@ r50x1_loc = "https://tfhub.dev/google/bit/m-r50x1/1"
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.layers.experimental.preprocessing import Rescaling
 
-def build_model(input_shape, num_classes):
-  feat_vec_layer = hub.KerasLayer(r50x1_loc, name='feat_vec_embedding', trainable=False)
+def build_model(input_shape, num_classes, feat_vec_embedding=None):
+  if feat_vec_embedding is not None:
+    feat_vec_layer = feat_vec_embedding
+  else:
+    feat_vec_layer = hub.KerasLayer(r50x1_loc, name='feat_vec_embedding', trainable=False)
 
   input_shape = (input_shape[0], input_shape[1], 3)
   input_image = Input(shape=input_shape, name='input_image')
