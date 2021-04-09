@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Schedule a Flight</title>
+</head>
+<body>
+<?php
+include 'connectdb.php';
+?>
+<h1>Here are the available flights:</h1>
+<table>
+<?php
+   $whichAirline= $_POST["Flight"];
+   $query = 'SELECT * FROM Airline, Flight WHERE Flight.AirlineCode=Airline.AirlineCode AND Flight.AirlineCode="' . $whichAirline . '"';
+   $result=$connection->query($query);
+    
+    while ($row=$result->fetch()) {
+	echo "<tr><td>".$row["FlightNumber"]."</td><td>".$row["ScheduledArrival"]."</td></tr>";
+    }
+?>
+</table>
+<?php
+   $connection = NULL;
+?>
+</body>
+</html>
